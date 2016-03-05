@@ -16,6 +16,7 @@ import cz.vutbr.web.css.CSSProperty.BorderRadius;
 import cz.vutbr.web.css.CSSProperty.Height;
 import cz.vutbr.web.css.CSSProperty.Opacity;
 import cz.vutbr.web.css.CSSProperty.TabSize;
+import cz.vutbr.web.css.CSSProperty.Transform;
 import cz.vutbr.web.css.SupportedCSS;
 import cz.vutbr.web.css.Term;
 import cz.vutbr.web.css.TermFactory;
@@ -95,6 +96,7 @@ import cz.vutbr.web.css.CSSProperty.TextDecoration;
 import cz.vutbr.web.css.CSSProperty.TextIndent;
 import cz.vutbr.web.css.CSSProperty.TextTransform;
 import cz.vutbr.web.css.CSSProperty.Top;
+import cz.vutbr.web.css.CSSProperty.TransformOrigin;
 import cz.vutbr.web.css.CSSProperty.UnicodeBidi;
 import cz.vutbr.web.css.CSSProperty.VerticalAlign;
 import cz.vutbr.web.css.CSSProperty.Visibility;
@@ -149,6 +151,12 @@ public class SupportedCSS3 implements SupportedCSS {
 		DEFAULT_UA_BORDER_SPACING.add(tf.createLength(0.0f));
 		DEFAULT_UA_BORDER_SPACING.add(tf.createLength(0.0f));
 	}
+    private static final TermList DEFAULT_UA_TRANSFORM_ORIGIN = tf.createList(3);
+    static {
+        DEFAULT_UA_TRANSFORM_ORIGIN.add(tf.createPercent(50.0f));
+        DEFAULT_UA_TRANSFORM_ORIGIN.add(tf.createPercent(50.0f));
+        DEFAULT_UA_TRANSFORM_ORIGIN.add(tf.createLength(0.0f));
+    }
 	private static final Term<?> DEFAULT_UA_WIDOWS = tf.createInteger(2);
 	private static final Term<?> DEFAULT_UA_ORPHANS = tf.createInteger(2);
 	private static final Term<?> DEFAULT_UA_PAUSE_BEFORE = tf.createTime(0.0f);
@@ -356,6 +364,9 @@ public class SupportedCSS3 implements SupportedCSS {
 		props.put("clear", Clear.NONE);
 		props.put("z-index", ZIndex.AUTO);
 		props.put("visibility", Visibility.VISIBLE);
+		props.put("transform", Transform.NONE);
+		props.put("transform-origin", TransformOrigin.list_values);
+		values.put("transform-origin", DEFAULT_UA_TRANSFORM_ORIGIN);
 
 		// background
 		props.put("background", Background.component_values);

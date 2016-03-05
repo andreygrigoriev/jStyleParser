@@ -21,6 +21,8 @@ import cz.vutbr.web.css.CSSProperty.BackgroundSize;
 import cz.vutbr.web.css.CSSProperty.BorderRadius;
 import cz.vutbr.web.css.CSSProperty.GenericCSSPropertyProxy;
 import cz.vutbr.web.css.CSSProperty.Opacity;
+import cz.vutbr.web.css.CSSProperty.Transform;
+import cz.vutbr.web.css.CSSProperty.TransformOrigin;
 import cz.vutbr.web.css.Declaration;
 import cz.vutbr.web.css.SupportedCSS;
 import cz.vutbr.web.css.Term;
@@ -31,6 +33,7 @@ import cz.vutbr.web.css.TermFunction;
 import cz.vutbr.web.css.TermIdent;
 import cz.vutbr.web.css.TermInteger;
 import cz.vutbr.web.css.TermLength;
+import cz.vutbr.web.css.TermLengthOrPercent;
 import cz.vutbr.web.css.TermList;
 import cz.vutbr.web.css.TermNumber;
 import cz.vutbr.web.css.TermPercent;
@@ -1150,6 +1153,157 @@ public class DeclarationTransformer {
 				Left.percentage, ValueRange.ALLOW_ALL, d, properties, values);
 	}
 
+    @SuppressWarnings("unused")
+    private boolean processTransform(Declaration d,
+            Map<String, CSSProperty> properties, Map<String, Term<?>> values) {
+
+        // just a simple value (e.g. "none")
+        if (d.size() == 1 && genericOneIdent(Transform.class, d, properties)) {
+            return true;
+        } else {
+
+            // valid function names
+            final Set<String> validFuncNames = new HashSet<String>(Arrays
+                    .asList("matrix", "translate", "translatex", "translatey", 
+                            "scale", "scalex", "scaley", "rotate", "skew", "skewx",
+                            "skewy", "matrix3d", "translate3d", "translateZ",
+                            "scale3d", "scalez", "rotate3d", "rotatex", "rotatey",
+                            "rotatez", "perspective"));
+
+            TermList list = tf.createList();
+
+            for (Term<?> t : d.asList()) {
+                if (t instanceof TermFunction
+                        && validFuncNames.contains(((TermFunction) t)
+                                .getFunctionName().toLowerCase()))
+                    list.add(t);
+                else
+                    return false;
+            }
+            // there is nothing in list after parsing
+            if (list.isEmpty())
+                return false;
+
+            properties.put("transform", Transform.list_values);
+            values.put("transform", list);
+            return true;
+        }
+    }
+    
+    @SuppressWarnings("unused")
+    private boolean processTransformOrigin(Declaration d,
+            Map<String, CSSProperty> properties, Map<String, Term<?>> values) {
+        
+        if (d.size() == 1
+            && genericTermIdent(BorderSpacing.class, d.get(0), ALLOW_INH, d.getProperty(), properties))
+        {
+            return true; //must be 'inherit'
+        }
+        else if (d.size() >= 1 && d.size() <= 3)
+        {
+            TermLengthOrPercent hpos = null;
+            TermLengthOrPercent vpos = null;
+            TermLength zpos = null;
+            //generic check and assign recognizable keywords
+            for (int i = 0; i < d.size(); i++)
+            {
+                Term<?> term = d.get(i);
+                if (term instanceof TermIdent)
+                {
+                    String value = ((TermIdent) term).getValue();
+                    if ("top".equals(value))
+                    {
+                        if (vpos == null)
+                            vpos = tf.createPercent(0.0f);
+                        else
+                            return false;
+                    }
+                    else if ("bottom".equals(value))
+                    {
+                        if (vpos == null)
+                            vpos = tf.createPercent(100.0f);
+                        else
+                            return false;
+                    }
+                    else if ("left".equals(value))
+                    {
+                        if (hpos == null)
+                            hpos = tf.createPercent(0.0f);
+                        else
+                            return false;
+                    }
+                    else if ("right".equals(value))
+                    {
+                        if (hpos == null)
+                            hpos = tf.createPercent(100.0f);
+                        else
+                            return false;
+                    }
+                    else if ("center".equals(value))
+                    {
+                        //skip for this iteration
+                    }
+                    else
+                        return false; //unknown keyword
+                }
+                else if (term instanceof TermLengthOrPercent)
+                {
+                    if (i > 1 && ((TermLengthOrPercent) term).isPercentage())
+                        return false; //percentages are only allowed for arguments 1 and 2
+                }
+                else
+                    return false; //invalid value (not keyword nor length nor percentage)
+            }
+            //assign 'center' or numeric values
+            for (int i = 0; i < d.size(); i++)
+            {
+                TermLengthOrPercent value = null;
+                Term<?> term = d.get(i);
+                if (i < 2) //first two arguments
+                {
+                    if (term instanceof TermIdent)
+                    {
+                        if ("center".equals(((TermIdent) term).getValue()))
+                                value = tf.createPercent(50.0f);
+                    }
+                    else
+                        value = (TermLengthOrPercent) term;
+                    
+                    if (value != null)
+                    {
+                        if (hpos == null)
+                            hpos = value;
+                        else if (vpos == null)
+                            vpos = value;
+                        else
+                            return false;
+                    }
+                }
+                else //last argument, must be length
+                {
+                    zpos = (TermLength) term;
+                }
+            }
+            //replace null values by defaults
+            if (hpos == null)
+                hpos = tf.createPercent(50.0f);
+            if (vpos == null)
+                vpos = tf.createPercent(50.0f);
+            if (zpos == null)
+                zpos = tf.createLength(0.0f);
+            //publish the values
+            TermList list = tf.createList();
+            list.add(hpos);
+            list.add(vpos);
+            list.add(zpos);
+            properties.put("transform-origin", TransformOrigin.list_values);
+            values.put("transform-origin", list);
+            return true;
+        }
+        else
+            return false; //invalid number of arguments
+    }
+    
 	@SuppressWarnings("unused")
 	private boolean processWidth(Declaration d,
 			Map<String, CSSProperty> properties, Map<String, Term<?>> values) {
