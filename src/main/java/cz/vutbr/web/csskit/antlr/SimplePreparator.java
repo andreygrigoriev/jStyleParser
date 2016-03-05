@@ -50,7 +50,7 @@ public class SimplePreparator implements Preparator {
 		RuleSet rs = rf.createSet();
 		rs.setSelectors(cslist);
 		rs.replaceAll(dlist);
-		log.info("Created RuleSet as with:\n{}", rs);
+		log.debug("Created RuleSet as with:\n{}", rs);
 
 		// wrap
 		if (wrap) {
@@ -83,7 +83,7 @@ public class SimplePreparator implements Preparator {
 		if (media != null && !media.isEmpty())
 			rm.setMediaQueries(media);
 
-		log.info("Create @media as with:\n{}", rm);
+		log.debug("Create @media as with:\n{}", rm);
 
 		return (RuleBlock<?>) rm;
 	}
@@ -106,7 +106,7 @@ public class SimplePreparator implements Preparator {
         rp.setName(name);
 		
 		rp.setPseudo(pseudo);
-		log.info("Create @page as with:\n{}", rp);
+		log.debug("Create @page as with:\n{}", rp);
 
 		return (RuleBlock<?>) rp;
 	}
@@ -122,7 +122,7 @@ public class SimplePreparator implements Preparator {
         RuleMargin rm = rf.createMargin(area);
         rm.replaceAll(decl);
 
-        log.info("Create @" + area + " with:\n" + rm);
+        log.debug("Create @" + area + " with:\n" + rm);
 
         return rm;
     }
@@ -136,7 +136,7 @@ public class SimplePreparator implements Preparator {
 
         RuleViewport rp = rf.createViewport();
         rp.replaceAll(decl);
-        log.info("Create @viewport as {}th with:\n{}", rp);
+        log.debug("Create @viewport as {}th with:\n{}", rp);
 
         return (RuleBlock<?>) rp;
     }
@@ -150,7 +150,7 @@ public class SimplePreparator implements Preparator {
 
         RuleFontFace rp = rf.createFontFace();
         rp.replaceAll(decl);
-        log.info("Create @font-face as with:\n{}", rp);
+        log.debug("Create @font-face as with:\n{}", rp);
 
         return (RuleBlock<?>) rp;
     }
@@ -175,7 +175,7 @@ public class SimplePreparator implements Preparator {
 		rs.replaceAll(dlist);
 		rs.setSelectors(Arrays.asList(cs));
 		
-		log.info("Create @media as with:\n{}", rs);
+		log.debug("Create @media as with:\n{}", rs);
 		
 		return (RuleBlock<?>) rs;
 	}
